@@ -81,11 +81,11 @@ add_shortcode('openpay_donate', function($atts){
             
             <!-- Header del Modal -->
             <div class="nr-openpay-header">
-                <div class="nr-openpay-logo">
+                <!-- <div class="nr-openpay-logo">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                         <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
                     </svg>
-                </div>
+                </div> -->
                 <h2>Hacer una Donación</h2>
             </div>
             
@@ -93,7 +93,7 @@ add_shortcode('openpay_donate', function($atts){
             <div class="nr-openpay-form">
                 <div class="nr-form-group">
                     <label>Proyecto:</label>
-                    <div class="nr-project-display" id="nr-modal-project"><?php echo esc_html($atts['project']); ?></div>
+                    <div class="nr-project-display" id="nr-modal-project"></div>
                 </div>
 
                 <!-- Campo: Email -->
@@ -264,8 +264,17 @@ add_action('admin_menu', function(){
         'manage_options',
         'openpay_donations',
         'nr_openpay_admin_dashboard',
-        'dashicons-heart',
+        plugin_dir_url(__FILE__) . 'assets/icons/donate-hand.svg',
         6
+    );
+    // Sobrescribir el primer submenú (que por defecto replica el título del menú principal)
+    add_submenu_page(
+        'openpay_donations',
+        'Resumen Donaciones',
+        'Resumen Donaciones',
+        'manage_options',
+        'openpay_donations',
+        'nr_openpay_admin_dashboard'
     );
     add_submenu_page(
         'openpay_donations',
@@ -357,7 +366,7 @@ function nr_openpay_settings_page(){
 
         <!-- Caja de Ayuda -->
         <div class="nr-info-box">
-            <h3>❓ ¿Cómo obtener tus credenciales?</h3>
+            <h3>¿Cómo obtener tus credenciales?</h3>
             <p><strong>Paso 1:</strong> Crea una cuenta en <a href="https://www.openpay.mx/" target="_blank">openpay.mx</a></p>
             <p><strong>Paso 2:</strong> Ve a tu panel de Openpay → Configuración → API Keys</p>
             <p><strong>Paso 3:</strong> Copia:</p>
@@ -369,7 +378,7 @@ function nr_openpay_settings_page(){
             
             <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
             
-            <h3>⚠️ Solución de Problemas</h3>
+            <h3>Solución de Problemas</h3>
             <p><strong>Si te da error "No se pudo conectar al servidor":</strong></p>
             <ul style="margin: 10px 0; padding-left: 20px;">
                 <li>✓ Verifica que el Merchant ID esté correctamente copiado</li>
@@ -410,7 +419,7 @@ function nr_openpay_admin_dashboard(){
         <div class="nr-stats-grid">
             <!-- Stat: Monto Total -->
             <div class="nr-stat-card">
-                <div class="nr-stat-icon">💰</div>
+                <div class="nr-stat-icon">$</div>
                 <div class="nr-stat-content">
                     <h3>Monto Total</h3>
                     <p class="nr-stat-value">$<?php echo esc_html($total_amount); ?> MXN</p>
@@ -419,7 +428,7 @@ function nr_openpay_admin_dashboard(){
             
             <!-- Stat: Total de Donaciones -->
             <div class="nr-stat-card">
-                <div class="nr-stat-icon">🎁</div>
+                <div class="nr-stat-icon">#</div>
                 <div class="nr-stat-content">
                     <h3>Total de Donaciones</h3>
                     <p class="nr-stat-value"><?php echo esc_html($total_donations); ?></p>
@@ -474,7 +483,7 @@ function nr_openpay_admin_dashboard(){
                 <!-- Estado Vacío -->
                 <div class="nr-empty-state">
                     <div class="nr-empty-icon">📭</div>
-                    <h3>Sin donaciones aún</h3>
+                    <h3>No hay registro de donaciones.</h3>
                     <p>Las donaciones aparecerán aquí cuando se realicen a través de tu sitio web.</p>
                 </div>
             <?php endif; ?>

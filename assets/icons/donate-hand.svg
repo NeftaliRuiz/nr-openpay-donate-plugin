@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <!-- Coin -->
+  <circle cx="17" cy="7" r="3" fill="currentColor"/>
+  <!-- Hand receiving -->
+  <path d="M3 14.5c0-.83.67-1.5 1.5-1.5H10c.69 0 1.25.56 1.25 1.25S10.69 15.5 10 15.5H7.8c-.44 0-.8.36-.8.8s.36.8.8.8H13.5c.83 0 1.5-.67 1.5-1.5 1.38.01 3.17.4 4.48 1.27.31.2.52.53.56.9.04.37-.09.74-.36 1L17 20.5c-.28.27-.65.43-1.04.43H9.5c-1.59 0-3.1-.63-4.22-1.76L3.3 18.2A1.5 1.5 0 013 17.14V14.5z" fill="currentColor"/>
+</svg>
