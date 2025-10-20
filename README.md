@@ -164,10 +164,8 @@ En el archivo principal `openpay-donate-plugin.php`:
 Para ayuda con:
 - **Plugin**: Revisa la documentación
 - **Openpay**: [Contacta a Openpay](https://www.openpay.mx/)
+- **Plugin Erro**: Contacta a @neft](https://www.neft.com.mx/)
 
-## 📄 Licencia
-
-Este plugin es de uso libre. Modifica y adapta según tus necesidades.
 
 ## 🚀 Changelog
 

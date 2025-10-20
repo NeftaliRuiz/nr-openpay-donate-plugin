@@ -55,8 +55,25 @@ add_action('admin_enqueue_scripts', function(){
 // ============================================================================
 // SHORTCODE: [openpay_donate] - Botón para abrir modal de donación
 // ============================================================================
-add_shortcode('openpay_donate', function($atts){
-    $atts = shortcode_atts(['project'=>'Proyecto'], $atts, 'openpay_donate');
+add_shortcode('openpay_donate', function($atts, $content = null){
+    // Aceptar sinónimos en español y contenido como nombre de proyecto
+    $atts = array_change_key_case((array)$atts, CASE_LOWER);
+    $atts = shortcode_atts([
+        'project' => '',
+        'proyecto' => '',
+        'nombre' => '',
+        'titulo' => ''
+    ], $atts, 'openpay_donate');
+    $project = $atts['project'] ?: $atts['proyecto'] ?: $atts['nombre'] ?: $atts['titulo'] ?: '';
+    if ($project === '' && isset($content)) {
+        $project = trim(wp_kses_post($content));
+    }
+    if ($project === '') { $project = 'Proyecto'; }
+
+    // País y moneda
+    $country  = get_option('nr_openpay_country', 'mx');
+    $currency = ($country === 'co') ? 'COP' : 'MXN';
+
     static $modal_loaded = false;
     ob_start();
     
@@ -65,7 +82,7 @@ add_shortcode('openpay_donate', function($atts){
     ?>
     <button 
         class="nr-donate-btn-open" 
-        data-project="<?php echo esc_attr($atts['project']); ?>"
+        data-project="<?php echo esc_attr($project); ?>"
         style="background: <?php echo esc_attr($primary_color); ?>;"
     >
         Donar Ahora
@@ -111,7 +128,7 @@ add_shortcode('openpay_donate', function($atts){
 
                 <!-- Campo: Monto -->
                 <div class="nr-form-group">
-                    <label for="nr-donate-amount">Monto de donación (MXN)</label>
+                    <label for="nr-donate-amount">Monto de donación (<?php echo esc_html($currency); ?>)</label>
                     <div class="nr-input-money">
                         <span class="nr-currency">$</span>
                         <input 
@@ -124,7 +141,7 @@ add_shortcode('openpay_donate', function($atts){
                             required 
                         />
                     </div>
-                    <small>Monto mínimo: $1.00 MXN</small>
+                    <small>Monto mínimo: $1.00 <?php echo esc_html($currency); ?></small>
                 </div>
 
                 <!-- Área de Mensajes -->
@@ -176,6 +193,7 @@ function nr_openpay_donate_create_session(){
     $merchant_id = get_option('nr_openpay_merchant_id','');
     $private_key = get_option('nr_openpay_private_key','');
     $mode = get_option('nr_openpay_mode','sandbox');
+    $country = strtolower(get_option('nr_openpay_country','mx'));
     
     if(!$merchant_id || !$private_key){
         wp_send_json_error(['message'=>'Configuración de Openpay incompleta. Por favor configura Merchant ID y Private Key.']);
@@ -185,13 +203,20 @@ function nr_openpay_donate_create_session(){
         // Preparar la solicitud a Openpay
         // Usar directamente cURL en lugar de la SDK si no está instalada
         
-        $url = $mode === 'production' 
-            ? 'https://api.openpay.mx/v1/' . $merchant_id . '/checkout'
-            : 'https://sandbox-api.openpay.mx/v1/' . $merchant_id . '/checkout';
+        // Endpoint por país y modo
+        if ($country === 'co') {
+            $url = ($mode === 'production')
+                ? 'https://api.openpay.co/v1/' . $merchant_id . '/checkout'
+                : 'https://sandbox-api.openpay.co/v1/' . $merchant_id . '/checkout';
+        } else {
+            $url = ($mode === 'production')
+                ? 'https://api.openpay.mx/v1/' . $merchant_id . '/checkout'
+                : 'https://sandbox-api.openpay.mx/v1/' . $merchant_id . '/checkout';
+        }
         
         $sessionData = [
             'amount' => $amount,
-            'currency' => 'MXN',
+            'currency' => ($country === 'co') ? 'COP' : 'MXN',
             'description' => 'Donación para: ' . $project,
             'order_id' => 'donation_' . time() . '_' . rand(1000, 9999),
             'customer' => [
@@ -296,6 +321,9 @@ function nr_openpay_settings_page(){
         update_option('nr_openpay_merchant_id', sanitize_text_field($_POST['merchant_id']));
         update_option('nr_openpay_private_key', sanitize_text_field($_POST['private_key']));
         update_option('nr_openpay_mode', sanitize_text_field($_POST['mode']));
+        if (isset($_POST['country'])) {
+            update_option('nr_openpay_country', sanitize_text_field($_POST['country']));
+        }
         echo '<div class="nr-notice nr-notice-success"><p>✓ Configuración guardada correctamente.</p></div>';
     }
 
@@ -303,10 +331,11 @@ function nr_openpay_settings_page(){
     $merchant_id = get_option('nr_openpay_merchant_id','');
     $private_key = get_option('nr_openpay_private_key','');
     $mode = get_option('nr_openpay_mode','sandbox');
+    $country = get_option('nr_openpay_country','mx');
     ?>
     <div class="nr-admin-container">
         <div class="nr-admin-header">
-            <h1>Configuración de Openpay</h1>
+            <h1>Configuración de Openpay </h1>
             <p class="nr-subtitle">Gestiona tus credenciales de pago seguro</p>
         </div>
 
@@ -315,16 +344,16 @@ function nr_openpay_settings_page(){
             <?php wp_nonce_field('nr_openpay_settings_nonce'); ?>
             
             <div class="nr-settings-card">
-                <!-- Campo: Merchant ID -->
+                <!-- Campo: Identificador de comercio (ID) -->
                 <div class="nr-form-group">
-                    <label for="merchant_id">Merchant ID</label>
+                    <label for="merchant_id">Identificador de comercio (ID)</label>
                     <input 
                         type="text" 
                         id="merchant_id"
                         name="merchant_id" 
                         value="<?php echo esc_attr($merchant_id); ?>" 
                         class="nr-input-field"
-                        placeholder="Tu Merchant ID de Openpay"
+                        placeholder="Tu Identificador de comercio (ID) de Openpay"
                         required
                     />
                     <small>Encuentra esto en tu panel de Openpay</small>
@@ -354,6 +383,16 @@ function nr_openpay_settings_page(){
                     </select>
                     <small>En Sandbox puedes probar sin cobrar. En Producción se realizarán pagos reales.</small>
                 </div>
+
+                <!-- Campo: País -->
+                <div class="nr-form-group">
+                    <label for="country">País</label>
+                    <select name="country" id="country" class="nr-select-field">
+                        <option value="mx" <?php selected($country,'mx'); ?>>México (MXN)</option>
+                        <option value="co" <?php selected($country,'co'); ?>>Colombia (COP)</option>
+                    </select>
+                    <small>Selecciona el país en el que operas con Openpay.</small>
+                </div>
             </div>
 
             <!-- Botón de Guardar -->
@@ -371,17 +410,17 @@ function nr_openpay_settings_page(){
             <p><strong>Paso 2:</strong> Ve a tu panel de Openpay → Configuración → API Keys</p>
             <p><strong>Paso 3:</strong> Copia:</p>
             <ul style="margin: 10px 0; padding-left: 20px;">
-                <li><strong>Merchant ID:</strong> Lo encuentras como "Merchant ID"</li>
+                <li><strong>Identificador de comercio (ID):</strong> Lo encuentras como "Identificador de comercio (ID)" o "Merchant ID"</li>
                 <li><strong>Private Key:</strong> La clave privada (comienza con "sk_")</li>
             </ul>
-            <p><strong>Paso 4:</strong> Pega aquí y guarda</p>
+            <p><strong>Paso 4:</strong> Pega el cuadro de texto del formulario y guarda</p>
             
             <hr style="margin: 15px 0; border: none; border-top: 1px solid #ddd;">
             
             <h3>Solución de Problemas</h3>
             <p><strong>Si te da error "No se pudo conectar al servidor":</strong></p>
             <ul style="margin: 10px 0; padding-left: 20px;">
-                <li>✓ Verifica que el Merchant ID esté correctamente copiado</li>
+                <li>✓ Verifica que el Identificador de comercio (ID) esté correctamente copiado</li>
                 <li>✓ Verifica que la Private Key esté correctamente copiada (sin espacios)</li>
                 <li>✓ Asegúrate de usar la Private Key, no la Public Key</li>
                 <li>✓ Si está en Sandbox, usa credenciales de sandbox</li>
@@ -399,6 +438,8 @@ function nr_openpay_settings_page(){
 function nr_openpay_admin_dashboard(){
     global $wpdb;
     $table = $wpdb->prefix . 'openpay_donations';
+    $country = get_option('nr_openpay_country','mx');
+    $currency = ($country === 'co') ? 'COP' : 'MXN';
     
     // Obtener todas las donaciones
     $donations = $wpdb->get_results("SELECT * FROM $table ORDER BY created_at DESC");
@@ -422,7 +463,7 @@ function nr_openpay_admin_dashboard(){
                 <div class="nr-stat-icon">$</div>
                 <div class="nr-stat-content">
                     <h3>Monto Total</h3>
-                    <p class="nr-stat-value">$<?php echo esc_html($total_amount); ?> MXN</p>
+                    <p class="nr-stat-value">$<?php echo esc_html($total_amount); ?> <?php echo esc_html($currency); ?></p>
                 </div>
             </div>
             
@@ -467,7 +508,7 @@ function nr_openpay_admin_dashboard(){
                             <div class="nr-donation-right">
                                 <div class="nr-donation-amount">
                                     <span class="nr-amount">$<?php echo number_format($d->amount, 2); ?></span>
-                                    <span class="nr-currency">MXN</span>
+                                    <span class="nr-currency"><?php echo esc_html($currency); ?></span>
                                 </div>
                                 <div class="nr-donation-status">
                                     <span class="nr-status nr-status-<?php echo esc_attr($d->status); ?>">
