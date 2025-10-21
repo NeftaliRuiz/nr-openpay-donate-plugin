@@ -415,7 +415,7 @@ add_action('admin_menu', function(){
 add_action('admin_init', function(){
     if (!is_admin()) return;
     if (!isset($_GET['page']) || $_GET['page'] !== 'openpay_donations') return;
-    if (!isset($_GET['export']) || !in_array($_GET['export'], ['excel','xls'], true)) return;
+    if (!isset($_GET['export']) || !in_array($_GET['export'], ['excel','xls','xlsx','csv'], true)) return;
 
     global $wpdb;
     $table = $wpdb->prefix . 'openpay_donations';
@@ -453,33 +453,43 @@ add_action('admin_init', function(){
     // Obtener filas filtradas
     $rows = $wpdb->get_results("SELECT * FROM $table $where_sql ORDER BY created_at DESC", ARRAY_A);
 
-    // Encabezados para Excel (XLS)
-    header('Content-Type: application/vnd.ms-excel; charset=utf-8');
-    header('Content-Disposition: attachment; filename="donaciones_' . date('Ymd_His') . '.xls"');
+    // Encabezados para CSV (Excel lo abre perfectamente)
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="donaciones_' . date('Ymd_His') . '.csv"');
     header('Pragma: no-cache');
     header('Expires: 0');
 
-    // Salida CSV compatible (Excel abrirá .xls con este MIME)
+    // Salida CSV compatible (Excel abrirá .xlsx con este MIME)
     $out = fopen('php://output', 'w');
     // BOM para UTF-8
     fprintf($out, "%s", "\xEF\xBB\xBF");
-    // Encabezados
-    fputcsv($out, ['Fecha', 'Proyecto', 'Donante', 'Email', 'Monto', 'Moneda', 'Estado']);
+    
+    // Título del reporte
+    fputcsv($out, ['REPORTE DE DONACIONES - ' . date('d/m/Y H:i')]);
+    fputcsv($out, []);
+    
+    // Encabezados con estilo (en mayúsculas)
+    fputcsv($out, ['FECHA', 'PROYECTO', 'DONANTE', 'EMAIL', 'MONTO', 'MONEDA', 'ESTADO']);
+    
     $total_periodo = 0.0;
+    $count = 0;
     foreach ($rows as $r) {
         $fecha = isset($r['created_at']) ? date('Y-m-d H:i', strtotime($r['created_at'])) : '';
         $proy = isset($r['project']) ? $r['project'] : '';
-        $donor = isset($r['donor_name']) ? $r['donor_name'] : '';
+        $donor = isset($r['donor_name']) ? $r['donor_name'] : 'Anónimo';
         $email = isset($r['email']) ? $r['email'] : '';
         $monto_float = isset($r['amount']) ? (float)$r['amount'] : 0.0;
         $amount = number_format($monto_float, 2, '.', '');
-        $estado = isset($r['status']) ? $r['status'] : '';
+        $estado = isset($r['status']) ? ucfirst($r['status']) : '';
         $total_periodo += $monto_float;
+        $count++;
         fputcsv($out, [$fecha, $proy, $donor, $email, $amount, $currency, $estado]);
     }
-    // Total al final
+    
+    // Separador y totales
     fputcsv($out, []);
-    fputcsv($out, ['', 'TOTAL periodo', '', '', number_format($total_periodo, 2, '.', ''), $currency, '']);
+    fputcsv($out, ['', '', '', 'TOTAL DONACIONES:', $count, '', '']);
+    fputcsv($out, ['', '', '', 'MONTO TOTAL:', number_format($total_periodo, 2, '.', ''), $currency, '']);
     fclose($out);
     exit;
 });
@@ -712,10 +722,12 @@ function nr_openpay_admin_dashboard(){
         <!-- Tabla de Historial -->
         <div class="nr-table-container">
             <div class="nr-table-header">
-                <h2>Historial de Donaciones</h2>
-                <?php if(!empty($donations)): ?>
-                    <p class="nr-table-info"><?php echo count($donations); ?> donaciones<?php echo !empty($search) ? ' encontradas' : ' registradas'; ?></p>
-                <?php endif; ?>
+                <div>
+                    <h2>Historial de Donaciones</h2>
+                    <?php if(!empty($donations)): ?>
+                        <p class="nr-table-info"><?php echo count($donations); ?> donaciones<?php echo !empty($search) ? ' encontradas' : ' en esta página'; ?></p>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <!-- Filtros de Búsqueda -->
@@ -812,9 +824,9 @@ function nr_openpay_admin_dashboard(){
                         <button 
                             type="submit" 
                             name="export" 
-                            value="xls" 
-                            style="padding: 8px 16px; background: #46b450; color: #fff; border: none; border-radius: 4px; cursor: pointer;"
-                            title="Exportar resultados filtrados a Excel (.xls)"
+                            value="csv" 
+                            style="padding: 8px 16px; background: #10b981; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);"
+                            title="Exportar resultados a CSV (compatible con Excel)"
                         >
                             Exportar Excel
                         </button>
@@ -850,8 +862,12 @@ function nr_openpay_admin_dashboard(){
                                 <td><?php echo esc_html($d->project); ?></td>
                                 <td><?php echo esc_html($d->donor_name ?: 'Anónimo'); ?></td>
                                 <td><?php echo esc_html($d->email); ?></td>
-                                <td style="text-align:right;">$<?php echo number_format($d->amount, 2); ?></td>
-                                <td><?php echo esc_html(ucfirst($d->status)); ?></td>
+                                <td style="text-align:right;"><strong>$<?php echo number_format($d->amount, 2); ?></strong></td>
+                                <td>
+                                    <span class="nr-status-badge <?php echo esc_attr(strtolower($d->status)); ?>">
+                                        <?php echo esc_html(ucfirst($d->status)); ?>
+                                    </span>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -899,9 +915,9 @@ function nr_openpay_admin_dashboard(){
                     <?php if(!empty($search)): ?>
                         <h3>No se encontraron resultados</h3>
                         <p>No hay donaciones que coincidan con tu búsqueda.</p>
-                        <a href="?page=openpay_donations" style="margin-top: 10px; display: inline-block; padding: 8px 16px; background: #0073aa; color: #fff; text-decoration: none; border-radius: 4px;">Ver todas las donaciones</a>
+                        <a href="?page=openpay_donations" class="nr-btn-reset">← Ver todas las donaciones</a>
                     <?php else: ?>
-                        <h3>No hay registro de donaciones.</h3>
+                        <h3>No hay donaciones registradas</h3>
                         <p>Las donaciones aparecerán aquí cuando se realicen a través de tu sitio web.</p>
                     <?php endif; ?>
                 </div>

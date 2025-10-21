@@ -32,6 +32,374 @@ body.openpay_page_openpay_donations_settings {
 }
 
 /* ============================================================================
+   TABLA DE DONACIONES: Estilos minimalistas y modernos
+   ============================================================================ */
+.nr-table-container {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e5e7eb;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.nr-table-header {
+    padding: 24px 28px;
+    background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+    border-bottom: 2px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nr-table-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nr-table-info {
+    margin: 4px 0 0 0;
+    font-size: 13px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.nr-table-container table.widefat {
+    border: none;
+    border-radius: 0;
+    background: #ffffff;
+    box-shadow: none;
+    margin: 0;
+}
+
+.nr-table-container table.widefat thead {
+    background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+}
+
+.nr-table-container table.widefat thead th {
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 16px 16px !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.nr-table-container table.widefat tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: all 0.2s ease;
+}
+
+.nr-table-container table.widefat tbody tr:hover {
+    background-color: #f9fafb !important;
+    transform: scale(1.001);
+}
+
+.nr-table-container table.widefat tbody td {
+    padding: 14px 16px !important;
+    font-size: 14px;
+    color: #374151;
+    vertical-align: middle;
+    border: none !important;
+    background: transparent !important;
+}
+
+.nr-table-container table.widefat tbody tr:last-child {
+    border-bottom: none;
+}
+
+/* Estados con badges de colores mejorados */
+.nr-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 14px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.nr-status-badge.created {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+}
+
+.nr-status-badge.pending {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+}
+
+.nr-status-badge.completed {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+}
+
+.nr-status-badge.failed {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #991b1b;
+}
+
+.nr-status-badge.cancelled {
+    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+    color: #6b7280;
+}
+
+/* ============================================================================
+   FILTROS: Estilos mejorados para el área de búsqueda
+   ============================================================================ */
+.nr-search-filters {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.nr-search-filters label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 12px;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nr-search-filters input[type="text"],
+.nr-search-filters input[type="date"],
+.nr-search-filters input[type="number"],
+.nr-search-filters select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    color: #111827;
+}
+
+.nr-search-filters input:hover,
+.nr-search-filters select:hover {
+    border-color: #d1d5db;
+}
+
+.nr-search-filters input:focus,
+.nr-search-filters select:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+}
+
+.nr-search-filters button[type="submit"] {
+    padding: 11px 24px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nr-search-filters button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.nr-search-filters a {
+    display: inline-block;
+    padding: 11px 24px;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nr-search-filters a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ============================================================================
+   PAGINACIÓN: Estilos mejorados
+   ============================================================================ */
+.tablenav .tablenav-pages {
+    margin: 20px 28px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #e5e7eb;
+}
+
+.tablenav .displaying-num {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.tablenav .pagination-links a,
+.tablenav .pagination-links .tablenav-pages-navspan {
+    display: inline-block;
+    padding: 8px 14px;
+    margin: 0 3px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.tablenav .pagination-links a {
+    background: #ffffff;
+    border: 2px solid #e5e7eb;
+    color: #374151;
+}
+
+.tablenav .pagination-links a:hover {
+    background: #0066cc;
+    border-color: #0066cc;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 102, 204, 0.2);
+}
+
+.tablenav .pagination-links .tablenav-pages-navspan {
+    background: #f3f4f6;
+    color: #9ca3af;
+    border: 2px solid #e5e7eb;
+}
+
+.tablenav .paging-input {
+    margin: 0 12px;
+    font-size: 14px;
+    color: #374151;
+    font-weight: 500;
+}
+
+/* ============================================================================
+   ESTADO VACÍO: Mensaje cuando no hay resultados
+   ============================================================================ */
+.nr-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+    border-radius: 12px;
+    margin: 20px 28px;
+}
+
+.nr-empty-icon {
+    font-size: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+
+.nr-empty-state h3 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.nr-empty-state p {
+    margin: 0 0 24px 0;
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.nr-btn-reset {
+    display: inline-block;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);
+}
+
+.nr-btn-reset:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 102, 204, 0.3);
+    color: #ffffff;
+}
+
+/* ============================================================================
+   TARJETAS DE ESTADÍSTICAS: Diseño mejorado
+   ============================================================================ */
+.nr-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.nr-stat-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    border-radius: 12px;
+    padding: 28px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nr-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #0066cc, #00a8e8);
+}
+
+.nr-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 102, 204, 0.15);
+}
+
+.nr-stat-content h3 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nr-stat-value {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #0066cc 0%, #00a8e8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ============================================================================
    CONTENEDOR: Ancho máximo y espaciado
    ============================================================================ */
 .nr-admin-container {
